@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { SalaryConfig } from './types';
+import { SalaryConfig, SalaryMode, FixedScheduleConfig, HourlyConfig } from './types';
 
 /**
  * 配置管理器
@@ -15,7 +15,27 @@ export class ConfigManager {
   public static getConfig(): SalaryConfig {
     const config = vscode.workspace.getConfiguration(this.CONFIG_SECTION);
 
+    // 获取薪资模式
+    const salaryMode = config.get<SalaryMode>('salaryMode', SalaryMode.HOURLY);
+
+    // 获取固定工作时间配置
+    const fixedSchedule: FixedScheduleConfig = config.get<FixedScheduleConfig>('fixedSchedule', {
+      monthlySalary: 15000,
+      workStartHour: 9,
+      workEndHour: 20,
+      workDays: [1, 2, 3, 4, 5]
+    });
+
+    // 获取按时计薪配置
+    const hourly: HourlyConfig = config.get<HourlyConfig>('hourly', {
+      hourlySalary: 62.5,
+      autoStartOnLaunch: true
+    });
+
     return {
+      salaryMode,
+      fixedSchedule,
+      hourly,
       dailySalary: config.get<number>('dailySalary', 500),
       workHoursPerDay: config.get<number>('workHoursPerDay', 8),
       currency: config.get<string>('currency', '¥'),
@@ -57,6 +77,17 @@ export class ConfigManager {
   public static async resetConfig(): Promise<void> {
     const config = vscode.workspace.getConfiguration(this.CONFIG_SECTION);
     const defaultConfig: SalaryConfig = {
+      salaryMode: SalaryMode.HOURLY,
+      fixedSchedule: {
+        monthlySalary: 15000,
+        workStartHour: 9,
+        workEndHour: 20,
+        workDays: [1, 2, 3, 4, 5]
+      },
+      hourly: {
+        hourlySalary: 62.5,
+        autoStartOnLaunch: true
+      },
       dailySalary: 500,
       workHoursPerDay: 8,
       currency: '¥',
@@ -143,17 +174,33 @@ export class ConfigManager {
   }
   
   /**
-   * 获取每小时薪资
+   * 获取每小时薪资（根据当前薪资模式）
    * @param config 配置对象
    * @returns 每小时薪资
    */
   public static getHourlySalary(config?: SalaryConfig): number {
     const currentConfig = config || this.getConfig();
-    return currentConfig.dailySalary / currentConfig.workHoursPerDay;
+
+    switch (currentConfig.salaryMode) {
+      case SalaryMode.FIXED_SCHEDULE:
+        // 固定工作时间模式：月薪 / (工作日数 * 4.33周/月 * 每日工作小时数)
+        const workDaysPerWeek = currentConfig.fixedSchedule.workDays.length;
+        const dailyWorkHours = currentConfig.fixedSchedule.workEndHour - currentConfig.fixedSchedule.workStartHour;
+        const monthlyWorkHours = workDaysPerWeek * 4.33 * dailyWorkHours;
+        return currentConfig.fixedSchedule.monthlySalary / monthlyWorkHours;
+
+      case SalaryMode.HOURLY:
+        // 按时计薪模式：直接返回小时薪资
+        return currentConfig.hourly.hourlySalary;
+
+      default:
+        // 兼容旧版本
+        return currentConfig.dailySalary / currentConfig.workHoursPerDay;
+    }
   }
-  
+
   /**
-   * 检查今天是否为工作日
+   * 检查今天是否为工作日（根据当前薪资模式）
    * @param config 配置对象
    * @param date 要检查的日期，默认为今天
    * @returns 是否为工作日
@@ -162,7 +209,62 @@ export class ConfigManager {
     const currentConfig = config || this.getConfig();
     const checkDate = date || new Date();
     const dayOfWeek = checkDate.getDay();
-    
-    return currentConfig.workDays.includes(dayOfWeek);
+
+    switch (currentConfig.salaryMode) {
+      case SalaryMode.FIXED_SCHEDULE:
+        return currentConfig.fixedSchedule.workDays.includes(dayOfWeek);
+
+      case SalaryMode.HOURLY:
+        // 按时计薪模式：任何时候都可以工作
+        return true;
+
+      default:
+        // 兼容旧版本
+        return currentConfig.workDays.includes(dayOfWeek);
+    }
+  }
+
+  /**
+   * 检查当前时间是否在工作时间内（仅对固定工作时间模式有效）
+   * @param config 配置对象
+   * @param date 要检查的时间，默认为当前时间
+   * @returns 是否在工作时间内
+   */
+  public static isWorkTime(config?: SalaryConfig, date?: Date): boolean {
+    const currentConfig = config || this.getConfig();
+
+    if (currentConfig.salaryMode !== SalaryMode.FIXED_SCHEDULE) {
+      // 非固定工作时间模式，任何时候都可以工作
+      return true;
+    }
+
+    const checkDate = date || new Date();
+    const currentHour = checkDate.getHours();
+
+    return currentHour >= currentConfig.fixedSchedule.workStartHour &&
+           currentHour < currentConfig.fixedSchedule.workEndHour;
+  }
+
+  /**
+   * 检查是否应该自动开始计时
+   * @param config 配置对象
+   * @returns 是否应该自动开始
+   */
+  public static shouldAutoStart(config?: SalaryConfig): boolean {
+    const currentConfig = config || this.getConfig();
+
+    switch (currentConfig.salaryMode) {
+      case SalaryMode.FIXED_SCHEDULE:
+        // 固定工作时间模式：检查是否为工作日且在工作时间内
+        return this.isWorkDay(currentConfig) && this.isWorkTime(currentConfig);
+
+      case SalaryMode.HOURLY:
+        // 按时计薪模式：检查是否启用了自动开始
+        return currentConfig.hourly.autoStartOnLaunch;
+
+      default:
+        // 兼容旧版本
+        return currentConfig.autoStart && this.isWorkDay(currentConfig);
+    }
   }
 }

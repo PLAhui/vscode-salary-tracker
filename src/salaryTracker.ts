@@ -101,9 +101,27 @@ export class SalaryTracker {
     if (this.state.status === TrackerStatus.RUNNING) {
       return;
     }
-    
+
+    const config = ConfigManager.getConfig();
     const now = new Date();
-    
+
+    // 检查固定工作时间模式的限制
+    if (config.salaryMode === 'fixed_schedule') {
+      if (!ConfigManager.isWorkDay(config, now)) {
+        vscode.window.showWarningMessage('今天不是工作日，无法开始计时');
+        return;
+      }
+
+      if (!ConfigManager.isWorkTime(config, now)) {
+        const startHour = config.fixedSchedule.workStartHour;
+        const endHour = config.fixedSchedule.workEndHour;
+        vscode.window.showWarningMessage(
+          `当前不在工作时间内（${startHour}:00-${endHour}:00），无法开始计时`
+        );
+        return;
+      }
+    }
+
     if (this.state.status === TrackerStatus.STOPPED) {
       // 全新开始
       this.state.todayStartTime = now;
@@ -119,14 +137,15 @@ export class SalaryTracker {
       this.state.currentSessionStart = now;
       this.state.pauseStartTime = undefined;
     }
-    
+
     this.state.status = TrackerStatus.RUNNING;
     this.startUpdateTimer();
-    
+
     await this.saveState();
     this.emitEvent('start');
-    
-    vscode.window.showInformationMessage('薪资追踪已开始');
+
+    const modeText = config.salaryMode === 'fixed_schedule' ? '固定工作时间模式' : '按时计薪模式';
+    vscode.window.showInformationMessage(`薪资追踪已开始（${modeText}）`);
   }
   
   /**
@@ -195,13 +214,26 @@ export class SalaryTracker {
   private updateWorkedTime(): void {
     if (this.state.status === TrackerStatus.RUNNING && this.state.currentSessionStart && this.state.todayStartTime) {
       const now = new Date();
+      const config = ConfigManager.getConfig();
 
-      // 计算从今天开始到现在的总工作时间（减去暂停时间）
-      const totalElapsed = now.getTime() - this.state.todayStartTime.getTime();
-      this.state.todayWorkedTime = Math.max(0, totalElapsed - this.state.totalPausedTime);
+      // 根据薪资模式计算工作时间
+      if (config.salaryMode === 'fixed_schedule') {
+        // 固定工作时间模式：只计算工作时间内的时间
+        this.state.todayWorkedTime = TimeCalculator.calculateTodayFixedScheduleWorkedTime(
+          this.state.todayStartTime,
+          config.fixedSchedule.workStartHour,
+          config.fixedSchedule.workEndHour,
+          config.fixedSchedule.workDays,
+          this.state.totalPausedTime,
+          now
+        );
+      } else {
+        // 按时计薪模式：计算所有时间
+        const totalElapsed = now.getTime() - this.state.todayStartTime.getTime();
+        this.state.todayWorkedTime = Math.max(0, totalElapsed - this.state.totalPausedTime);
+      }
 
       // 计算收入
-      const config = ConfigManager.getConfig();
       const hourlySalary = ConfigManager.getHourlySalary(config);
       this.state.todayEarnings = TimeCalculator.calculateEarnings(
         this.state.todayWorkedTime,
@@ -250,11 +282,26 @@ export class SalaryTracker {
     // 如果正在运行，实时计算当前时间和收入
     if (currentState.status === TrackerStatus.RUNNING && currentState.todayStartTime) {
       const now = new Date();
-      const totalElapsed = now.getTime() - currentState.todayStartTime.getTime();
-      currentState.todayWorkedTime = Math.max(0, totalElapsed - currentState.totalPausedTime);
+      const config = ConfigManager.getConfig();
+
+      // 根据薪资模式计算工作时间
+      if (config.salaryMode === 'fixed_schedule') {
+        // 固定工作时间模式：只计算工作时间内的时间
+        currentState.todayWorkedTime = TimeCalculator.calculateTodayFixedScheduleWorkedTime(
+          currentState.todayStartTime,
+          config.fixedSchedule.workStartHour,
+          config.fixedSchedule.workEndHour,
+          config.fixedSchedule.workDays,
+          currentState.totalPausedTime,
+          now
+        );
+      } else {
+        // 按时计薪模式：计算所有时间
+        const totalElapsed = now.getTime() - currentState.todayStartTime.getTime();
+        currentState.todayWorkedTime = Math.max(0, totalElapsed - currentState.totalPausedTime);
+      }
 
       // 实时计算收入
-      const config = ConfigManager.getConfig();
       const hourlySalary = ConfigManager.getHourlySalary(config);
       currentState.todayEarnings = TimeCalculator.calculateEarnings(
         currentState.todayWorkedTime,
@@ -304,8 +351,7 @@ export class SalaryTracker {
    * 检查是否应该自动开始
    */
   public shouldAutoStart(): boolean {
-    const config = ConfigManager.getConfig();
-    return config.autoStart && ConfigManager.isWorkDay(config);
+    return ConfigManager.shouldAutoStart();
   }
 
   /**

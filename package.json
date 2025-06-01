@@ -2,9 +2,10 @@
   "name": "vscode-salary-tracker",
   "displayName": "实时薪资追踪器",
   "description": "在VSCode中实时显示当天薪资收入，支持自定义工作时间和日薪配置",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "huiziqin",
   "license": "MIT",
+  "icon": "images/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/PLAhui/vscode-salary-tracker.git"
@@ -27,7 +28,7 @@
     "time"
   ],
   "galleryBanner": {
-    "color": "#4CAF50",
+    "color": "#FF6B35",
     "theme": "dark"
   },
   "activationEvents": [
@@ -74,22 +75,89 @@
     "viewsWelcome": [
       {
         "view": "salaryTracker",
-        "contents": "欢迎使用薪资追踪器！\n[开始配置](command:salaryTracker.openSettings)\n[开始计时](command:salaryTracker.start)"
+        "contents": "欢迎使用薪资追踪器！\n[开始配置](command:salaryTracker.openSettings)\n[开始计时](command:salaryTracker.start)\n[暂停计时](command:salaryTracker.pause)\n[重置计时](command:salaryTracker.reset)"
       }
     ],
     "configuration": {
       "title": "薪资追踪器",
       "properties": {
+        "salaryTracker.salaryMode": {
+          "type": "string",
+          "enum": ["fixed_schedule", "hourly"],
+          "enumDescriptions": [
+            "固定工作时间模式（月薪制）",
+            "按时计薪模式（小时制）"
+          ],
+          "default": "hourly",
+          "description": "薪资计算模式"
+        },
+        "salaryTracker.fixedSchedule": {
+          "type": "object",
+          "default": {
+            "monthlySalary": 15000,
+            "workStartHour": 9,
+            "workEndHour": 20,
+            "workDays": [1, 2, 3, 4, 5]
+          },
+          "description": "固定工作时间配置",
+          "properties": {
+            "monthlySalary": {
+              "type": "number",
+              "description": "月薪金额（元）",
+              "minimum": 0
+            },
+            "workStartHour": {
+              "type": "number",
+              "description": "工作开始时间（24小时制，如 9 表示9:00）",
+              "minimum": 0,
+              "maximum": 23
+            },
+            "workEndHour": {
+              "type": "number",
+              "description": "工作结束时间（24小时制，如 20 表示20:00）",
+              "minimum": 1,
+              "maximum": 24
+            },
+            "workDays": {
+              "type": "array",
+              "description": "工作日（0=周日, 1=周一, ..., 6=周六）",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 6
+              }
+            }
+          }
+        },
+        "salaryTracker.hourly": {
+          "type": "object",
+          "default": {
+            "hourlySalary": 62.5,
+            "autoStartOnLaunch": true
+          },
+          "description": "按时计薪配置",
+          "properties": {
+            "hourlySalary": {
+              "type": "number",
+              "description": "小时薪资（元/小时）",
+              "minimum": 0
+            },
+            "autoStartOnLaunch": {
+              "type": "boolean",
+              "description": "VSCode启动时自动开始计时"
+            }
+          }
+        },
         "salaryTracker.dailySalary": {
           "type": "number",
           "default": 500,
-          "description": "日薪金额（元）",
+          "description": "日薪金额（元）- 兼容旧版本",
           "minimum": 0
         },
         "salaryTracker.workHoursPerDay": {
           "type": "number",
           "default": 8,
-          "description": "每日工作小时数",
+          "description": "每日工作小时数 - 兼容旧版本",
           "minimum": 1,
           "maximum": 24
         },
@@ -98,11 +166,10 @@
           "default": "¥",
           "description": "货币符号"
         },
-
         "salaryTracker.autoStart": {
           "type": "boolean",
           "default": false,
-          "description": "VSCode启动时自动开始计时"
+          "description": "VSCode启动时自动开始计时 - 兼容旧版本"
         },
         "salaryTracker.showInStatusBar": {
           "type": "boolean",
@@ -185,7 +252,8 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "npx vsce package",
-    "publish": "npx vsce publish"
+    "publish": "npx vsce publish",
+    "check-icon": "node scripts/generate-icon.js"
   },
   "devDependencies": {
     "@types/vscode": "^1.74.0",

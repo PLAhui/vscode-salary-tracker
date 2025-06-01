@@ -257,9 +257,143 @@ export class TimeCalculator {
     if (!endTime) {
       return null;
     }
-    
+
     const workEnd = new Date(date);
     workEnd.setHours(endTime.hour, endTime.minute, 0, 0);
     return workEnd;
+  }
+
+  /**
+   * 计算固定工作时间模式下的有效工作时间
+   * @param startTime 开始时间
+   * @param endTime 结束时间
+   * @param workStartHour 工作开始小时（24小时制）
+   * @param workEndHour 工作结束小时（24小时制）
+   * @param workDays 工作日数组
+   * @param pausedDuration 暂停时长（毫秒）
+   * @returns 有效工作时间（毫秒）
+   */
+  public static calculateFixedScheduleWorkedTime(
+    startTime: Date,
+    endTime: Date,
+    workStartHour: number,
+    workEndHour: number,
+    workDays: number[],
+    pausedDuration: number = 0
+  ): number {
+    let totalWorkedTime = 0;
+    const current = new Date(startTime);
+
+    while (current <= endTime) {
+      const dayOfWeek = current.getDay();
+
+      // 检查是否为工作日
+      if (workDays.includes(dayOfWeek)) {
+        // 计算当天的工作时间段
+        const dayStart = new Date(current);
+        dayStart.setHours(workStartHour, 0, 0, 0);
+
+        const dayEnd = new Date(current);
+        dayEnd.setHours(workEndHour, 0, 0, 0);
+
+        // 计算实际工作时间的交集
+        const actualStart = new Date(Math.max(startTime.getTime(), dayStart.getTime()));
+        const actualEnd = new Date(Math.min(endTime.getTime(), dayEnd.getTime()));
+
+        if (actualStart < actualEnd) {
+          totalWorkedTime += actualEnd.getTime() - actualStart.getTime();
+        }
+      }
+
+      // 移动到下一天
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+    }
+
+    return Math.max(0, totalWorkedTime - pausedDuration);
+  }
+
+  /**
+   * 计算固定工作时间模式下今日的有效工作时间
+   * @param todayStartTime 今日开始时间
+   * @param workStartHour 工作开始小时
+   * @param workEndHour 工作结束小时
+   * @param workDays 工作日数组
+   * @param pausedDuration 暂停时长（毫秒）
+   * @param currentTime 当前时间，默认为现在
+   * @returns 今日有效工作时间（毫秒）
+   */
+  public static calculateTodayFixedScheduleWorkedTime(
+    todayStartTime: Date,
+    workStartHour: number,
+    workEndHour: number,
+    workDays: number[],
+    pausedDuration: number = 0,
+    currentTime: Date = new Date()
+  ): number {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+
+    // 检查今天是否为工作日
+    if (!workDays.includes(dayOfWeek)) {
+      return 0;
+    }
+
+    // 计算今天的工作时间段
+    const todayWorkStart = new Date(today);
+    todayWorkStart.setHours(workStartHour, 0, 0, 0);
+
+    const todayWorkEnd = new Date(today);
+    todayWorkEnd.setHours(workEndHour, 0, 0, 0);
+
+    // 计算实际工作时间的交集
+    const actualStart = new Date(Math.max(todayStartTime.getTime(), todayWorkStart.getTime()));
+    const actualEnd = new Date(Math.min(currentTime.getTime(), todayWorkEnd.getTime()));
+
+    if (actualStart >= actualEnd) {
+      return 0;
+    }
+
+    const workedTime = actualEnd.getTime() - actualStart.getTime();
+    return Math.max(0, workedTime - pausedDuration);
+  }
+
+  /**
+   * 获取下一个工作时间开始时间
+   * @param workStartHour 工作开始小时
+   * @param workDays 工作日数组
+   * @param currentTime 当前时间，默认为现在
+   * @returns 下一个工作时间开始时间
+   */
+  public static getNextWorkStartTime(
+    workStartHour: number,
+    workDays: number[],
+    currentTime: Date = new Date()
+  ): Date {
+    const nextWorkTime = new Date(currentTime);
+
+    // 最多检查7天
+    for (let i = 0; i < 7; i++) {
+      const dayOfWeek = nextWorkTime.getDay();
+
+      if (workDays.includes(dayOfWeek)) {
+        const workStart = new Date(nextWorkTime);
+        workStart.setHours(workStartHour, 0, 0, 0);
+
+        if (workStart > currentTime) {
+          return workStart;
+        }
+      }
+
+      // 移动到下一天
+      nextWorkTime.setDate(nextWorkTime.getDate() + 1);
+      nextWorkTime.setHours(0, 0, 0, 0);
+    }
+
+    // 如果找不到，返回明天的工作开始时间
+    const tomorrow = new Date(currentTime);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(workStartHour, 0, 0, 0);
+    return tomorrow;
   }
 }

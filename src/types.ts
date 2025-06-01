@@ -3,12 +3,52 @@
  */
 
 /**
+ * 薪资计算模式枚举
+ */
+export enum SalaryMode {
+  /** 固定工作时间模式（月薪制） */
+  FIXED_SCHEDULE = 'fixed_schedule',
+  /** 按时计薪模式（小时制） */
+  HOURLY = 'hourly'
+}
+
+/**
+ * 固定工作时间配置
+ */
+export interface FixedScheduleConfig {
+  /** 月薪金额 */
+  monthlySalary: number;
+  /** 工作开始时间（24小时制，如 9 表示9:00） */
+  workStartHour: number;
+  /** 工作结束时间（24小时制，如 20 表示20:00） */
+  workEndHour: number;
+  /** 工作日数组（0=周日, 1=周一, ..., 6=周六） */
+  workDays: number[];
+}
+
+/**
+ * 按时计薪配置
+ */
+export interface HourlyConfig {
+  /** 小时薪资 */
+  hourlySalary: number;
+  /** VSCode启动时自动开始 */
+  autoStartOnLaunch: boolean;
+}
+
+/**
  * 薪资追踪器配置接口
  */
 export interface SalaryConfig {
-  /** 日薪金额 */
+  /** 薪资计算模式 */
+  salaryMode: SalaryMode;
+  /** 固定工作时间配置 */
+  fixedSchedule: FixedScheduleConfig;
+  /** 按时计薪配置 */
+  hourly: HourlyConfig;
+  /** 日薪金额（兼容旧版本） */
   dailySalary: number;
-  /** 每日工作小时数 */
+  /** 每日工作小时数（兼容旧版本） */
   workHoursPerDay: number;
   /** 货币符号 */
   currency: string;
@@ -18,7 +58,7 @@ export interface SalaryConfig {
   showInStatusBar: boolean;
   /** 更新间隔（毫秒） */
   updateInterval: number;
-  /** 工作日数组 */
+  /** 工作日数组（兼容旧版本） */
   workDays: number[];
   /** 实时更新频率（毫秒） */
   realTimeUpdateInterval: number;

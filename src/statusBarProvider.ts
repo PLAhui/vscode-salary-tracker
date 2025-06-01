@@ -164,20 +164,44 @@ export class StatusBarProvider {
     lines.push('💰 今日薪资追踪');
     lines.push('');
 
+    // 薪资模式信息
+    const modeText = config.salaryMode === 'fixed_schedule' ? '固定工作时间模式' : '按时计薪模式';
+    lines.push(`模式: ${modeText}`);
+
+    if (config.salaryMode === 'fixed_schedule') {
+      const { workStartHour, workEndHour, monthlySalary } = config.fixedSchedule;
+      lines.push(`工作时间: ${workStartHour}:00-${workEndHour}:00`);
+      lines.push(`月薪: ${config.currency}${monthlySalary}`);
+      lines.push(`时薪: ${config.currency}${ConfigManager.getHourlySalary(config).toFixed(2)}`);
+    } else {
+      lines.push(`时薪: ${config.currency}${config.hourly.hourlySalary}`);
+    }
+
+    lines.push('');
+
     // 基本信息
     lines.push(`收入: ${config.currency}${state.todayEarnings.toFixed(3)}`);
     lines.push(`工作时间: ${workedTime}`);
-    lines.push(`进度: ${progress.toFixed(1)}% (${TimeCalculator.millisecondsToHours(state.todayWorkedTime).toFixed(2)}h / ${config.workHoursPerDay}h)`);
+
+    // 根据模式显示不同的进度信息
+    if (config.salaryMode === 'fixed_schedule') {
+      const dailyWorkHours = config.fixedSchedule.workEndHour - config.fixedSchedule.workStartHour;
+      const progress = Math.min(100, (TimeCalculator.millisecondsToHours(state.todayWorkedTime) / dailyWorkHours) * 100);
+      lines.push(`进度: ${progress.toFixed(1)}% (${TimeCalculator.millisecondsToHours(state.todayWorkedTime).toFixed(2)}h / ${dailyWorkHours}h)`);
+    } else {
+      lines.push(`工作时长: ${TimeCalculator.millisecondsToHours(state.todayWorkedTime).toFixed(2)}h`);
+    }
 
     // 状态信息
     const statusText = this.getStatusText(state.status);
     lines.push(`状态: ${statusText}`);
 
-    // 预计完成时间
-    if (state.status === TrackerStatus.RUNNING) {
+    // 预计完成时间（仅固定工作时间模式）
+    if (state.status === TrackerStatus.RUNNING && config.salaryMode === 'fixed_schedule') {
+      const dailyWorkHours = config.fixedSchedule.workEndHour - config.fixedSchedule.workStartHour;
       const estimatedCompletion = TimeCalculator.calculateEstimatedCompletion(
         state,
-        config.workHoursPerDay
+        dailyWorkHours
       );
 
       if (estimatedCompletion) {
