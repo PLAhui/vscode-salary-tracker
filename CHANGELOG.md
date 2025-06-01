@@ -5,7 +5,7 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [1.2.0] - 2024-06-01
+## [1.2.1] - 2024-06-01
 ### 新增
 - ✨ 增加计薪模式
 

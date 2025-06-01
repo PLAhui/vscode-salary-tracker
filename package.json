@@ -1,8 +1,8 @@
 {
   "name": "vscode-salary-tracker",
-  "displayName": "实时薪资追踪器",
-  "description": "在VSCode中实时显示当天薪资收入，支持自定义工作时间和日薪配置",
-  "version": "1.2.0",
+  "displayName": "薪资追踪-看看今天挣了多少钱",
+  "description": "一个简单的 VSCode 插件，用于追踪你的工作时间和计算你的日薪",
+  "version": "1.2.1",
   "publisher": "huiziqin",
   "license": "MIT",
   "icon": "images/icon.png",
