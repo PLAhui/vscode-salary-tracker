@@ -48,7 +48,7 @@ export class StatusBarProvider {
   /**
    * 状态变化处理
    */
-  private onStateChanged(state: TrackerState): void {
+  private onStateChanged(_state: TrackerState): void {
     this.updateDisplay();
     // 注意：不在这里控制定时器，让定时器始终运行以确保实时更新
   }
@@ -107,21 +107,24 @@ export class StatusBarProvider {
     const targetHours = config.workHoursPerDay;
     const progress = Math.min(100, (workedHours / targetHours) * 100);
 
-    let icon: string;
+    let icon: string = '';
     let backgroundColor: vscode.ThemeColor | undefined;
 
-    switch (state.status) {
-      case TrackerStatus.RUNNING:
-        icon = '$(play)';
-        backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
-        break;
-      case TrackerStatus.PAUSED:
-        icon = '$(debug-pause)';
-        backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
-        break;
-      case TrackerStatus.STOPPED:
-        icon = '$(primitive-square)';
-        break;
+    // 根据配置决定是否显示状态图标
+    if (config.enableStatusIcons) {
+      switch (state.status) {
+        case TrackerStatus.RUNNING:
+          icon = config.statusIcons?.running || '$(play)';
+          backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
+          break;
+        case TrackerStatus.PAUSED:
+          icon = config.statusIcons?.paused || '$(debug-pause)';
+          backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+          break;
+        case TrackerStatus.STOPPED:
+          icon = config.statusIcons?.stopped || '$(primitive-square)';
+          break;
+      }
     }
 
     // 添加跳动指示器
@@ -142,7 +145,10 @@ export class StatusBarProvider {
       animationIndicator = ` ${indicators[this.animationCounter]}`;
     }
 
-    const text = `${icon} ${currency}${earnings}${animationIndicator}`;
+    // 构建状态栏文本，如果没有图标则不添加空格
+    const text = icon
+      ? `${icon} ${currency}${earnings}${animationIndicator}`
+      : `${currency}${earnings}${animationIndicator}`;
 
     const tooltip = this.createTooltip(state, config, workedTime, progress);
 

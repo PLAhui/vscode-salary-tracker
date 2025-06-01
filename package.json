@@ -2,7 +2,7 @@
   "name": "vscode-salary-tracker",
   "displayName": "实时薪资追踪器",
   "description": "在VSCode中实时显示当天薪资收入，支持自定义工作时间和日薪配置",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "publisher": "huiziqin",
   "license": "MIT",
   "repository": {
@@ -148,6 +148,34 @@
           "type": "boolean",
           "default": true,
           "description": "启用状态栏金额后的动画指示器"
+        },
+        "salaryTracker.statusIcons": {
+          "type": "object",
+          "default": {
+            "running": "$(play)",
+            "paused": "$(debug-pause)",
+            "stopped": "$(primitive-square)"
+          },
+          "description": "自定义状态栏前的状态图标",
+          "properties": {
+            "running": {
+              "type": "string",
+              "description": "运行状态图标（支持VSCode图标或emoji）"
+            },
+            "paused": {
+              "type": "string",
+              "description": "暂停状态图标（支持VSCode图标或emoji）"
+            },
+            "stopped": {
+              "type": "string",
+              "description": "停止状态图标（支持VSCode图标或emoji）"
+            }
+          }
+        },
+        "salaryTracker.enableStatusIcons": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用状态栏前的状态图标"
         }
       }
     }

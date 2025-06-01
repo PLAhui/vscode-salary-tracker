@@ -30,6 +30,10 @@
       workHours: document.getElementById('workHours'),
       enableIndicators: document.getElementById('enableIndicators'),
       customIndicators: document.getElementById('customIndicators'),
+      enableStatusIcons: document.getElementById('enableStatusIcons'),
+      runningIcon: document.getElementById('runningIcon'),
+      pausedIcon: document.getElementById('pausedIcon'),
+      stoppedIcon: document.getElementById('stoppedIcon'),
       workDayInfo: document.getElementById('workDayInfo'),
       workDayMessage: document.getElementById('workDayMessage')
     };
@@ -149,6 +153,52 @@
         }
       });
     }
+
+    // 启用状态图标复选框事件
+    if (elements.enableStatusIcons) {
+      elements.enableStatusIcons.addEventListener('change', (e) => {
+        const value = e.target.checked;
+        console.log('更新状态图标启用状态:', value);
+        vscode.postMessage({
+          type: 'updateConfig',
+          key: 'enableStatusIcons',
+          value: value
+        });
+      });
+    }
+
+    // 状态图标输入事件
+    const iconInputs = [
+      { element: elements.runningIcon, key: 'running' },
+      { element: elements.pausedIcon, key: 'paused' },
+      { element: elements.stoppedIcon, key: 'stopped' }
+    ];
+
+    iconInputs.forEach(({ element, key }) => {
+      if (element) {
+        element.addEventListener('change', (e) => {
+          const value = e.target.value.trim();
+          console.log(`更新${key}状态图标:`, value);
+
+          // 获取当前的statusIcons配置
+          const currentStatusIcons = currentConfig.statusIcons || {
+            running: '$(play)',
+            paused: '$(debug-pause)',
+            stopped: '$(primitive-square)'
+          };
+
+          // 更新对应的图标
+          const newStatusIcons = { ...currentStatusIcons };
+          newStatusIcons[key] = value || currentStatusIcons[key];
+
+          vscode.postMessage({
+            type: 'updateConfig',
+            key: 'statusIcons',
+            value: newStatusIcons
+          });
+        });
+      }
+    });
 
     console.log('事件监听器初始化完成');
   }
@@ -363,6 +413,16 @@
   function updateConfigInputs() {
     elements.dailySalary.value = currentConfig.dailySalary;
     elements.workHours.value = currentConfig.workHoursPerDay;
+    elements.enableIndicators.checked = currentConfig.enableIndicators;
+    elements.customIndicators.value = currentConfig.customIndicators ? currentConfig.customIndicators.join(', ') : '';
+    elements.enableStatusIcons.checked = currentConfig.enableStatusIcons;
+
+    // 更新状态图标输入框
+    if (currentConfig.statusIcons) {
+      elements.runningIcon.value = currentConfig.statusIcons.running || '';
+      elements.pausedIcon.value = currentConfig.statusIcons.paused || '';
+      elements.stoppedIcon.value = currentConfig.statusIcons.stopped || '';
+    }
   }
   
   // 更新工作日信息

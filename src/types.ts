@@ -28,6 +28,14 @@ export interface SalaryConfig {
   customIndicators: string[];
   /** 启用动画指示器 */
   enableIndicators: boolean;
+  /** 自定义状态图标 */
+  statusIcons: {
+    running: string;
+    paused: string;
+    stopped: string;
+  };
+  /** 启用状态图标 */
+  enableStatusIcons: boolean;
 }
 
 /**

@@ -26,7 +26,13 @@ export class ConfigManager {
       realTimeUpdateInterval: config.get<number>('realTimeUpdateInterval', 250), // 实时更新250ms
       enableHighFrequencyUpdate: config.get<boolean>('enableHighFrequencyUpdate', true),
       customIndicators: config.get<string[]>('customIndicators', ['⚡', '💰', '📈', '✨']),
-      enableIndicators: config.get<boolean>('enableIndicators', true)
+      enableIndicators: config.get<boolean>('enableIndicators', true),
+      statusIcons: config.get<{running: string; paused: string; stopped: string}>('statusIcons', {
+        running: '$(play)',
+        paused: '$(debug-pause)',
+        stopped: '$(primitive-square)'
+      }),
+      enableStatusIcons: config.get<boolean>('enableStatusIcons', true)
     };
   }
   
@@ -61,7 +67,13 @@ export class ConfigManager {
       realTimeUpdateInterval: 250,
       enableHighFrequencyUpdate: true,
       customIndicators: ['⚡', '💰', '📈', '✨'],
-      enableIndicators: true
+      enableIndicators: true,
+      statusIcons: {
+        running: '$(play)',
+        paused: '$(debug-pause)',
+        stopped: '$(primitive-square)'
+      },
+      enableStatusIcons: true
     };
 
     for (const [key, value] of Object.entries(defaultConfig)) {

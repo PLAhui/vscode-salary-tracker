@@ -223,6 +223,27 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
               <small>支持emoji和文字，例如：⚡,💰,📈,✨ 或 $,€,£,¥</small>
             </div>
             <div class="config-item">
+              <label for="enableStatusIcons">
+                <input type="checkbox" id="enableStatusIcons">
+                启用状态栏前的状态图标
+              </label>
+            </div>
+            <div class="config-item">
+              <label for="runningIcon">运行状态图标</label>
+              <input type="text" id="runningIcon" placeholder="$(play) 或 ▶️">
+              <small>支持VSCode图标如$(play)或emoji如▶️</small>
+            </div>
+            <div class="config-item">
+              <label for="pausedIcon">暂停状态图标</label>
+              <input type="text" id="pausedIcon" placeholder="$(debug-pause) 或 ⏸️">
+              <small>支持VSCode图标如$(debug-pause)或emoji如⏸️</small>
+            </div>
+            <div class="config-item">
+              <label for="stoppedIcon">停止状态图标</label>
+              <input type="text" id="stoppedIcon" placeholder="$(primitive-square) 或 ⏹️">
+              <small>支持VSCode图标如$(primitive-square)或emoji如⏹️</small>
+            </div>
+            <div class="config-item">
               <button class="control-btn secondary full-width" id="openSettingsBtn">
                 <span class="btn-icon">⚙️</span>
                 打开详细设置
