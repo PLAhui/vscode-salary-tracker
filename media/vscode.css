@@ -1,0 +1,31 @@
+/* VSCode theme variables */
+:root {
+	--vscode-font-family: var(--vscode-font-family);
+	--vscode-font-size: var(--vscode-font-size);
+	--vscode-font-weight: var(--vscode-font-weight);
+	
+	--vscode-foreground: var(--vscode-foreground);
+	--vscode-background: var(--vscode-background);
+	
+	--vscode-button-background: var(--vscode-button-background);
+	--vscode-button-foreground: var(--vscode-button-foreground);
+	--vscode-button-hoverBackground: var(--vscode-button-hoverBackground);
+	
+	--vscode-input-background: var(--vscode-input-background);
+	--vscode-input-foreground: var(--vscode-input-foreground);
+	--vscode-input-border: var(--vscode-input-border);
+	
+	--vscode-badge-background: var(--vscode-badge-background);
+	--vscode-badge-foreground: var(--vscode-badge-foreground);
+	
+	--vscode-progressBar-background: var(--vscode-progressBar-background);
+	
+	--vscode-textLink-foreground: var(--vscode-textLink-foreground);
+	--vscode-textLink-activeForeground: var(--vscode-textLink-activeForeground);
+	
+	--vscode-errorForeground: var(--vscode-errorForeground);
+	--vscode-warningForeground: var(--vscode-warningForeground);
+	
+	--vscode-panel-border: var(--vscode-panel-border);
+	--vscode-sideBar-background: var(--vscode-sideBar-background);
+}

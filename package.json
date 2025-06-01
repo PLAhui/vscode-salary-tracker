@@ -1,0 +1,169 @@
+{
+  "name": "vscode-salary-tracker",
+  "displayName": "实时薪资追踪器",
+  "description": "在VSCode中实时显示当天薪资收入，支持自定义工作时间和日薪配置",
+  "version": "1.0.8",
+  "publisher": "huiziqin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PLAhui/vscode-salary-tracker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PLAhui/vscode-salary-tracker/issues"
+  },
+  "homepage": "https://github.com/PLAhui/vscode-salary-tracker#readme",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "salary",
+    "tracker",
+    "income",
+    "productivity",
+    "time"
+  ],
+  "galleryBanner": {
+    "color": "#4CAF50",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "salaryTracker.start",
+        "title": "开始计时",
+        "category": "薪资追踪"
+      },
+      {
+        "command": "salaryTracker.pause",
+        "title": "暂停计时",
+        "category": "薪资追踪"
+      },
+      {
+        "command": "salaryTracker.reset",
+        "title": "重置今日计时",
+        "category": "薪资追踪"
+      },
+      {
+        "command": "salaryTracker.openSettings",
+        "title": "打开设置",
+        "category": "薪资追踪"
+      },
+      {
+        "command": "salaryTracker.showPanel",
+        "title": "显示薪资面板",
+        "category": "薪资追踪"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "salaryTracker",
+          "name": "薪资追踪",
+          "when": "true"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "salaryTracker",
+        "contents": "欢迎使用薪资追踪器！\n[开始配置](command:salaryTracker.openSettings)\n[开始计时](command:salaryTracker.start)"
+      }
+    ],
+    "configuration": {
+      "title": "薪资追踪器",
+      "properties": {
+        "salaryTracker.dailySalary": {
+          "type": "number",
+          "default": 500,
+          "description": "日薪金额（元）",
+          "minimum": 0
+        },
+        "salaryTracker.workHoursPerDay": {
+          "type": "number",
+          "default": 8,
+          "description": "每日工作小时数",
+          "minimum": 1,
+          "maximum": 24
+        },
+        "salaryTracker.currency": {
+          "type": "string",
+          "default": "¥",
+          "description": "货币符号"
+        },
+
+        "salaryTracker.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "VSCode启动时自动开始计时"
+        },
+        "salaryTracker.showInStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "在状态栏显示实时收入"
+        },
+        "salaryTracker.updateInterval": {
+          "type": "number",
+          "default": 500,
+          "description": "更新间隔（毫秒）",
+          "minimum": 100
+        },
+        "salaryTracker.realTimeUpdateInterval": {
+          "type": "number",
+          "default": 250,
+          "description": "实时更新间隔（毫秒），用于前端界面的高频更新",
+          "minimum": 100
+        },
+        "salaryTracker.enableHighFrequencyUpdate": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用高频率更新，让薪资数据跳动更明显"
+        },
+        "salaryTracker.workDays": {
+          "type": "array",
+          "default": [1, 2, 3, 4, 5],
+          "description": "工作日（0=周日, 1=周一, ..., 6=周六）",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 6
+          }
+        },
+        "salaryTracker.customIndicators": {
+          "type": "array",
+          "default": ["⚡", "💰", "📈", "✨"],
+          "description": "自定义状态栏金额后的动画指示器（支持emoji和文字）",
+          "items": {
+            "type": "string"
+          }
+        },
+        "salaryTracker.enableIndicators": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用状态栏金额后的动画指示器"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npx vsce package",
+    "publish": "npx vsce publish"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "typescript": "^4.9.4",
+    "@vscode/vsce": "^2.15.0"
+  },
+  "dependencies": {}
+}

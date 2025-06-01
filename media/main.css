@@ -1,0 +1,273 @@
+/* 主样式文件 */
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background-color: var(--vscode-background);
+  padding: 0;
+  margin: 0;
+}
+
+.container {
+  padding: 16px;
+  max-width: 100%;
+}
+
+/* 头部样式 */
+.header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--vscode-foreground);
+}
+
+/* 状态卡片 */
+.status-section {
+  margin-bottom: 20px;
+}
+
+.status-card {
+  background: var(--vscode-sideBar-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.status-indicator.running {
+  color: #4CAF50;
+}
+
+.status-indicator.paused {
+  color: #FF9800;
+}
+
+.status-indicator.stopped {
+  color: #757575;
+}
+
+.earnings-display {
+  margin-top: 8px;
+}
+
+.earnings-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #4CAF50;
+  margin-bottom: 4px;
+  transition: all 0.15s ease-in-out;
+  transform-origin: center;
+}
+
+.earnings-amount.updating {
+  animation: earningsJump 0.3s ease-in-out;
+}
+
+@keyframes earningsJump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); color: #66BB6A; }
+  100% { transform: scale(1); }
+}
+
+.earnings-label {
+  font-size: 12px;
+  color: var(--vscode-foreground);
+  opacity: 0.7;
+}
+
+/* 统计区域 */
+.stats-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  background: var(--vscode-sideBar-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--vscode-foreground);
+  opacity: 0.7;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--vscode-foreground);
+  transition: all 0.15s ease-in-out;
+  transform-origin: center;
+}
+
+.stat-value.updating {
+  animation: statJump 0.3s ease-in-out;
+}
+
+@keyframes statJump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); }
+}
+
+/* 控制按钮 */
+.controls-section {
+  margin-bottom: 20px;
+}
+
+.control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.control-btn:hover:not(:disabled) {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.control-btn.primary {
+  background: #007ACC;
+  color: white;
+}
+
+.control-btn.primary:hover:not(:disabled) {
+  background: #005a9e;
+}
+
+.control-btn.secondary {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.control-btn.danger {
+  background: #d73a49;
+  color: white;
+}
+
+.control-btn.danger:hover:not(:disabled) {
+  background: #b31d28;
+}
+
+.control-btn.full-width {
+  width: 100%;
+}
+
+.btn-icon {
+  font-size: 14px;
+}
+
+/* 配置区域 */
+.config-section {
+  margin-bottom: 20px;
+}
+
+.config-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--vscode-foreground);
+}
+
+.config-item {
+  margin-bottom: 12px;
+}
+
+.config-item label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: var(--vscode-foreground);
+  opacity: 0.8;
+}
+
+.config-item input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 3px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  font-size: 13px;
+}
+
+.config-item input:focus {
+  outline: none;
+  border-color: #007ACC;
+}
+
+/* 信息区域 */
+.info-section {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--vscode-sideBar-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+}
+
+.info-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--vscode-foreground);
+  opacity: 0.8;
+}
+
+.info-icon {
+  font-size: 14px;
+}
+
+/* 响应式设计 */
+@media (max-width: 300px) {
+  .container {
+    padding: 12px;
+  }
+  
+  .earnings-amount {
+    font-size: 20px;
+  }
+  
+  .control-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
